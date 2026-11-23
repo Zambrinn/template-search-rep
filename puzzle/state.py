@@ -26,18 +26,41 @@ class State:
 
     def neighbors(self) -> List["State"]:
         """Retorna os estados filhos válidos a partir deste estado."""
-        # TODO: implemente a geração de estados filhos
-        raise NotImplementedError
+        index = self.blank_index # encontrar o espaço em branco
+        result = []
+
+        moves = []
+        if index not in (0, 1, 2):
+            moves.append(("UP", index - 3))
+        if index not in (6, 7, 8):
+            moves.append(("DOWN", index + 3))
+        if index not in (0, 3, 6):
+            moves.append(("LEFT", index - 1))
+        if index not in (2, 5, 8):
+            moves.append(("RIGHT", index + 1))
+
+        for action, new_index in moves:
+            new = list(self.tiles)
+            new[index], new[new_index] = new[new_index], new[index] 
+            result.append(State(tuple(new), parent=self, action=action, cost=self.cost + 1)) 
+
+        return result   
 
     def path(self) -> List["State"]:
-        """Retorna a sequência de estados do estado inicial até este."""
-        # TODO: implemente a reconstrução do caminho usando self.parent
-        raise NotImplementedError
-
+        path = []
+        actual = self
+        while actual is not None:
+            path.append(actual)
+            actual = actual.parent
+        path.reverse()
+        return path
+    
     def actions(self) -> List[str]:
-        """Retorna a sequência de ações do estado inicial até este."""
-        # TODO: implemente usando path()
-        raise NotImplementedError
+        actions = []
+        for state in self.path():
+            if state.action is not None:
+                actions.append(state.action)
+        return actions
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, State) and self.tiles == other.tiles
